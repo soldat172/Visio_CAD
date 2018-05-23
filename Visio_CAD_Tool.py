@@ -5,258 +5,312 @@ from guizero import App, Text, TextBox, PushButton, Window
 
 #Declaring of variables
 global siteName
-siteName = str ('Paul')
 global apPrefix
-apPrefix = siteName + '-XX-'
 global apNumber
-apNumber =  int('1')
 global apName
-apName = str(apPrefix) + str(apNumber)
-global count
-count = int('1')
+global excelCount
 global excelNumber
-excelNumber = int('1')
-global name
-name = 'A'
-global number
-number = int('1')
+global rowLetter
 global rowNumber
-rowNumber = str(name) + str(number)
+global rowWholeName
 global list
-list=[99999]
 global excelName
-excelName = 'Paul'
 global formatNumber
-formatNumber = format(apNumber, '05')
 global excelStartingInteger
+global keyPress
+global keyPressS
+global keyPressG
+global keyPressM
+global keyPressH
+global keyPressD
+global keyPressBack
+global keyPressForward
+global keyPressPause
+global keyPressEquals
+siteName = str ('Paul')
+apPrefix = siteName + '-XX-'
+apNumber =  int('1')
+apName = str(apPrefix) + str(apNumber)
+excelCount = int('1')
+excelNumber = int('1')
+rowLetter = 'A'
+rowNumber = int('1')
+rowWholeName = str(rowLetter) + str(rowNumber)
+list=[99999]
+excelName = 'Paul'
+formatNumber = format(apNumber, '05')
 excelStartingInteger = int('1')
+keyPress = False
+keyPressS = False
+keyPressG = False
+keyPressM = False
+keyPressH = False
+keyPressD = False
+keyPressBack = False
+keyPressForward = False
+keyPressPause = False
+keyPressEquals = False
 
-def startWorkbook (): #Starts an excel. Required for visioTool.
+#Starts an excel. Required for visioTool.
+def startWorkbook (): 
     global wb
     wb = Workbook()
     global ws
     ws = wb.active
 
-def openFiles(): #Opens file explorer
+#Opens file explorer
+def openFiles(): 
     global excelName
-    Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-    excelName = filedialog.askopenfilename() # show an "Open" dialog box and return the path to the selected file
+    Tk().withdraw() # We don't want a full GUI, so keep the root window from appearing
+    excelName = filedialog.askopenfilename() # Show an "Open" dialog box and return the path to the selected file
     print(excelName)
     print('')
 
+# This whole function is for reading keypresses. keyboard.read() works better but breaks GUI
+# everytime pressed() is called it updates whether a key has been pressed
+def pressed(): 
+    global keyPress
+    global keyPressS
+    global keyPressG
+    global keyPressM
+    global keyPressH
+    global keyPressD
+    global keyPressBack
+    global keyPressForward
+    global keyPressPause
+    global keyPressEquals
+    keyPress = keyboard.is_pressed('`')
+    keyPressS = keyboard.is_pressed('s')
+    keyPressG = keyboard.is_pressed('g')
+    keyPressM = keyboard.is_pressed('m')
+    keyPressH = keyboard.is_pressed('h')
+    keyPressD = keyboard.is_pressed('d')
+    keyPressBack = keyboard.is_pressed('[')
+    keyPressForward = keyboard.is_pressed(']')
+    keyPressPause = keyboard.is_pressed('pause')
+    keyPressEquals = keyboard.is_pressed('=')
+
+# visioTool encapsulates all things Visio Tool related for better organization.
 def visioTool():
-    global apName
-    global apNumber
-    global formatNumber
-    global excelStartingInteger
-#----------------------------------------------------------------------Makes GUI work
-    global app
-    global window2
-    global displayText
-    displayText = Text(window2, text=apName, align="left", grid=[0,0])
-#----------------------------------------------------------------------Makes GUI work
-    def visioGuts (): #Controls the actions of the Visio Tool
+    def pause():
+        global keyPressPause
+        keyPressPause = False
+        pressed()
+        if keyPressPause == True:
+            print('Unpaused')
+            displayText.clear()
+            displayText.append('Unpaused')
+            app.after(100,visioLoop)
+        else:
+            app.after(100,pause)
+
+    def visioGuts():
         global apNumber
         global formatNumber
         global excelStartingInteger
-#----------------------------------------------------------------------Makes GUI work
-        global app
-        global window2
-        global displayText
-        displayText.clear()
-        window2.focus()
-        displayText.append(apName)
-        window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work
         print (apName)
-        ws.cell(excelStartingInteger, 1, apName)  #writes in excel **format** ->(row, column, what is written in cell)
-        pyautogui.click(); pyautogui.typewrite(str(formatNumber)) #clicks mouse then types ap number
-        pyautogui.press('esc'); pyautogui.press('esc') #hits escape twice
+        ws.cell(excelStartingInteger, 1, apName)  #writes in excel **format** ->(row, column, content to be written in cell)
+        pyautogui.press('backspace'); pyautogui.typewrite(str(formatNumber)) #Types ap number
         apNumber += 1 #increments ap number by 1
-        excelStartingInteger += 1
-        formatNumber = format(apNumber, '05')
-    print ('Start of Visio tool') #Uses keypress to fill in names on Visio
-#----------------------------------------------------------------------Makes GUI work
-    displayText.clear()
-    window2.focus()
-    displayText.append('Start of Visio tool')
-    window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work
-    while True:
-        keyPress = keyboard.read_key() #reads ALL keypress's and saves to variable
-        if keyPress == '`' :
+        excelStartingInteger += 1 # Increments Excel cell to be written in
+        formatNumber = format(apNumber, '05') # Modifies apNumber by adding up to 5 zeros in front
+        displayText.clear() # Clears GUI
+        displayText.append(apName) # Write AP name in GUI
+        app.after(1,visioLoop) # after 1ms start the visioLoop
+        
+    def visioLoop():
+        global keyPress
+        global keyPressS
+        global keyPressG
+        global keyPressM
+        global keyPressH
+        global keyPressD
+        global keyPressBack
+        global keyPressForward
+        global keyPressPause
+        global keyPressEquals
+        global apNumber
+        global formatNumber
+        global excelStartingInteger
+        global apName
+        
+        pressed ()
+        
+        if keyPress == True :
+            keyPress = False
             apName = str(apPrefix) + str(formatNumber)
             visioGuts ()
-        elif keyPress == 'g':
-            apName = str(apPrefix) + str(formatNumber) + 'G'
-            visioGuts ()
-        elif keyPress == 'h':
-            apName = str(apPrefix) + str(formatNumber) + 'H'
-            visioGuts ()
-        elif keyPress == 'm':
-            apName = str(apPrefix) + str(formatNumber) + 'M'
-            visioGuts ()
-        elif keyPress == 'd':
-            apName = str(apPrefix) + str(formatNumber) + 'D'
-            visioGuts ()
-        elif keyPress == 's':
+            
+        elif keyPressS == True :
+            keyPressS = False
             apName = str(apPrefix) + str(formatNumber) + 'S'
             visioGuts ()
-        elif keyPress == '[': #goes down one ap number.
+            
+        elif keyPressG == True :
+            keyPressG = False
+            apName = str(apPrefix) + str(formatNumber) + 'G'
+            visioGuts ()
+            
+        elif keyPressM == True :
+            keyPressM = False
+            apName = str(apPrefix) + str(formatNumber) + 'M'
+            visioGuts ()
+            
+        elif keyPressH == True :
+            keyPressH = False
+            apName = str(apPrefix) + str(formatNumber) + 'H'
+            visioGuts ()
+            
+        elif keyPressD == True :
+            keyPressD = False
+            apName = str(apPrefix) + str(formatNumber) + 'D'
+            visioGuts ()
+            
+        elif keyPressBack == True: #goes down one ap number.
+            keyPressBack = False
             apNumber -= 1
             excelStartingInteger -= 1
             formatNumber = format(apNumber, '05')
             apName = str(apPrefix) + str(formatNumber)
-            print (apName + ' replace?')
-#----------------------------------------------------------------------Makes GUI work
+            print (apName)
             displayText.clear()
-            window2.focus()
-            displayText.append(apName + ' replace?')
-            window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work=
-            time.sleep(.08)
-        elif keyPress == ']': #goes up one ap number.
+            displayText.append(apName)
+            app.after(80,visioLoop) # 80ms pause before starting the visioLoop to prevent duplication of command
+            
+        elif keyPressForward == True: #goes up one ap number.
+            keyPressForward = False
             apNumber += 1
             excelStartingInteger += 1
             formatNumber = format(apNumber, '05')
             apName = str(apPrefix) + str(formatNumber)
-            print (apName + ' replace?')
-#----------------------------------------------------------------------Makes GUI work
+            print (apName)
             displayText.clear()
-            window2.focus()
-            displayText.append(apName + ' replace?')
-            window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work
-            time.sleep(.08)
-        elif keyPress == 'pause':
-            while True:
-#----------------------------------------------------------------------Makes GUI work
-                displayText.clear()
-                window2.focus()
-                displayText.append('paused')
-                window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work
-                print('paused')
-                time.sleep(.1)
-                keyPress = keyboard.read_key() #reads ALL keypress's and saves to variable
-                if keyPress == 'pause' :
-                    break
-#----------------------------------------------------------------------Makes GUI work
+            displayText.append(apName)
+            app.after(80,visioLoop)
+            
+        elif keyPressPause == True:
+            print ('Paused')
             displayText.clear()
-            window2.focus()
-            displayText.append('unpaused')
-            window3 = Window(app, visible=False)
-            time.sleep(.1)
-            #break
-#----------------------------------------------------------------------Makes GUI work
-            print('unpaused')
-        elif keyPress == '=':
-            break
-    time.sleep(.1) #prevents cadTool from also breaking
+            displayText.append('Paused')
+            app.after(100,pause)
+            
+        elif keyPressEquals == True:
+            keyPressEquals = False
+            saveExcel()
+            app.show()
+            
+        else:
+            app.after(1,visioLoop)
+            
+    global apName
+    global apNumber
+    global formatNumber
+    global excelStartingInteger
+    global displayText
+    print('Start of Visio Tool')
+    displayText.clear()
+    displayText.append('Start of Visio Tool')
+    visioLoop()
+
 def saveExcel():
+    global displayText
     global excelName
     wb.save(excelName) #Saves workbook
-    print ('')
     print ('End of Visio Tool')
-    print ('')
-#----------------------------------------------------------------------Makes GUI work
     displayText.clear()
-    window2.focus()
     displayText.append('End of Visio Tool')
-    window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work
+    
 def openExcel(): #Opens excel and reads items to a list
-    global number
     global rowNumber
-    global name
+    global rowWholeName
+    global rowLetter
     global list
     book = openpyxl.load_workbook(excelName)#Opens Excel and declares variables
-    sheet = book.active
-    while number < 7500: #Reading the excel names and puts them into a list
-        rowNumber = str(name) + str(number)
-        a1 = sheet[rowNumber]
-        list.append(a1)
-        number += 1
-def cadTool():
-#----------------------------------------------------------------------Makes GUI work
-    global app
-    global window2
-    global displayText
-    displayText = Text(window2, text=apName, align="left", grid=[0,0])
-#----------------------------------------------------------------------Makes GUI work
-    print ('Start of CAD tool')
-#----------------------------------------------------------------------Makes GUI work
-    displayText.clear()
-    window2.focus()
-    displayText.append('Start of CAD tool')
-    window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work
-    while True: #Start of CAD Tool (reads excel names and places names into CAD)
-        global count
-        global excelNumber
-        test = keyboard.read_key()
-        if test == '`' :
-            excelNumber = (list[count])
-            x = excelNumber.value
-            a,b,c = x.split('-')
-            newExcelNumber = (a + '-' + b + '\n-' + c)
-            print (newExcelNumber)
-#----------------------------------------------------------------------Makes GUI work
-            displayText.clear()
-            window2.focus()
-            displayText.append(excelNumber.value)
-            window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work
-            pyautogui.hotkey('ctrl', 'a'); pyautogui.typewrite(newExcelNumber); pyautogui.hotkey('ctrl', 'enter')
-            count += 1
-        elif test == ']':
-            count += 1
-            excelNumber = (list[count])
-            print (excelNumber.value + ' replace?')
-#----------------------------------------------------------------------Makes GUI work
-            displayText.clear()
-            window2.focus()
-            displayText.append(excelNumber.value + ' replace?')
-            window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work
-            time.sleep(.08)
-        elif test == '[':
-            count -= 1
-            excelNumber = (list[count])
-            print (excelNumber.value + ' replace?')
-#----------------------------------------------------------------------Makes GUI work
-            displayText.clear()
-            window2.focus()
-            displayText.append(excelNumber.value + ' replace?')
-            window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work
-            time.sleep(.08)
-        elif test == '=':
-            break
-    print ('')
-    print ('End of CAD Tool')
-    print ('')
-#----------------------------------------------------------------------Makes GUI work
-    displayText.clear()
-    window2.focus()
-    displayText.append('End of CAD Tool')
-    window3 = Window(app, visible=False)
-#----------------------------------------------------------------------Makes GUI work
+    sheet = book.active #Makes the current sheet active
+    for x in range (0,99999): #Reading the excel names and puts them into a list
+        rowWholeName = str(rowLetter) + str(rowNumber)
+        specificCellValue = sheet[rowWholeName]
+        list.append(specificCellValue)
+        rowNumber += 1
 
+def cadCapsule():
+    def cadTool(): #(reads excel names and places names into CAD)
+        global excelCount
+        global displayText
+        global window2
+        global excelNumber
+        global keyPress
+        global keyPressForward
+        global keyPressBack
+        global keyPressEquals
+        pressed ()
+        
+        if keyPress == True:
+            keyPress = False
+            excelNumber = (list[excelCount])
+            x = excelNumber.value
+            a,b,c = x.split('-') # Splits the ap name into 3 parts
+            newExcelNumber = (a + '-' + b + '\n-' + c) # The 3 parts are concatenated together with a character return
+            print (newExcelNumber)
+            pyautogui.hotkey('ctrl', 'a'); pyautogui.typewrite(newExcelNumber); pyautogui.hotkey('ctrl', 'enter')
+            excelCount += 1
+            displayText.clear() # Clears the gui
+            displayText.append(excelNumber.value) # Displays the AP name
+            app.after(1,cadTool)
+            
+        elif keyPressForward == True: # Looks if the ']' is pressed 
+            keyPressForward = False
+            excelCount += 1
+            excelNumber = (list[excelCount])
+            print (excelNumber.value)
+            displayText.clear()
+            displayText.append(excelNumber.value)
+            app.after(80,cadTool)
+            
+        elif keyPressBack == True:
+            keyPressBack = False
+            excelCount -= 1
+            excelNumber = (list[excelCount])
+            print (excelNumber.value)
+            displayText.clear()
+            displayText.append(excelNumber.value)
+            app.after(80,cadTool)
+            
+        elif keyPressEquals == True:
+            keyPressEquals = False
+            app.show()
+            displayText.clear()
+            displayText.append('End of Visio Tool')
+            
+        else:
+            app.after(1,cadTool)
+            
+    global excelCount
+    global displayText
+    global window2
+    global excelNumber
+    global keyPress
+    global keyPressForward
+    global keyPressBack
+    global keyPressEquals
+    displayText.clear()
+    displayText.append('Start of CAD Tool')
+    cadTool()
+    
 def theGUI():
     def apStartingNumber():
         global apNumber
-        apNumber = int(startingNumber.value)
         global formatNumber
+        apNumber = int(startingNumber.value)
         formatNumber = format(apNumber, '05')
         print ('AP number changed to ' + str(apNumber))
         changingText.value = "AP number changed to " + str(apNumber) #Text for changing AP number
     def changeSiteName():
         global siteName
-        siteName = str(siteNames.value)
         global apPrefix
-        apPrefix = siteName + '-XX-'
         global apName
+        siteName = str(siteNames.value)
+        apPrefix = siteName + '-XX-'
         apName = str(apPrefix) + str(apNumber)
         print('Site name changed to ' + siteName)
         changingText.value = "Site changed to " + siteName #Text for changing site name
@@ -266,14 +320,14 @@ def theGUI():
         window2.show()
         startWorkbook()
         visioTool()
-        saveExcel()
-        app.show()
+        #saveExcel()
+        #app.show()
     def cad():
         app.hide()
         window2.show()
         openExcel()
-        cadTool()
-        app.show()
+        cadCapsule()
+        #app.show()
     def openFileCommand():
         openFiles()
     def open_window():
@@ -283,6 +337,8 @@ def theGUI():
 
 #Main app start
     global app
+    global window2
+    global displayText
     app = App(title = "Phoenix_Oath", width=160, height=43, layout='grid')
 
     button2 = PushButton(app, text = "Visio Tool", command = open_window, align="left", grid=[0,1])
@@ -306,22 +362,12 @@ def theGUI():
     changingText = Text(window,text="War has changed", align ="left", grid=[1,3])
 
 #Second Window Start
-    global window2
-    global displayText
-    global apName
-    window2 = Window(app, title = "World Takeover", width=200, height=45)
+    window2 = Window(app, title = "World Takeover", width=200, height=25)
     window2.hide()
-
-#Third Window Start
-    window3 = Window(app, title = "One bullet at a time", width=200, height=75)
-    displayText = Text(window3, text="CAD tool is going", align="left", grid=[0,0]) 
-    window3.hide()
+    displayText = Text(window2, text='Start of Visio Tool', align="left", grid=[0,0])
     
     openFiles()
-    app.display() 
-
+    app.display()
 theGUI()
-
-
 
 
